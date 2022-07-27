@@ -26,17 +26,8 @@ class Data(BaseModel):
 @app.post("/pin/")
 def get_db_row(item: Data):
     data = dict(item)
-    #return item
+    return item
     #print(data)
-
-    # Configure our producer which will send data to  the MLdata topic
-    item_producer = KafkaProducer(
-        bootstrap_servers="localhost:9092",
-        client_id="ML data producer",
-        value_serializer=lambda imessage: dumps(imessage).encode("ascii")
-    )
-    for imessage in item:
-        item_producer.send(topic="coretopic", value=imessage)
 
 
 if __name__ == '__main__':
