@@ -53,7 +53,7 @@ class Spark:
         df = df.drop("index")
         df.printSchema()
         df.show(10)
-
+        #remember to replace the 2k to 2000 and integer format
         df.write.format("org.apache.spark.sql.cassandra")\
             .mode('append')\
             .options(table="pindata", keyspace="spark_keyspace")\
@@ -63,18 +63,9 @@ class Spark:
     
         spark.stop
         
-        
 
-
-    
-        
-    
-    
-        
-
-#Spark().s3_extract()
+Spark().s3_extract()
 Spark().write_to_cassandra()
-
 
 
 
