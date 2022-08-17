@@ -13,6 +13,9 @@ from airflow.operators.python import PythonOperator
 from datetime import datetime
 from datetime import timedelta
 import sys
+from pyspark.sql.functions import when
+from pyspark.sql.functions import regexp_replace
+from pyspark.sql.types import IntegerType
 
 class Spark:
 
@@ -49,8 +52,15 @@ class Spark:
         print("Distinct count: "+str(df.count()))
         df = df.dropDuplicates()
         print("Distinct count: "+str(df.count()))
-        df.na.fill(value="null").show()
-        df = df.drop("index")
+        df = df.withColumn('follower_count',when(df.follower_count.endswith('k'),regexp_replace(df.follower_count,'k','000')) \
+                .when(df.follower_count.endswith('M'),regexp_replace(df.follower_count,'M','000000')) \
+                .when(df.follower_count.endswith('B'),regexp_replace(df.follower_count,'B','000000000'))\
+                .otherwise(df.follower_count))
+        #change follower_count column to int data type
+        df = df.withColumn("follower_count", df["follower_count"].cast(IntegerType())).fillna(0) \
+                        .drop("index")
+
+        
         df.printSchema()
         df.show(10)
         #remember to replace the 2k to 2000 and integer format

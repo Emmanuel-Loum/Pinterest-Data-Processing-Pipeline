@@ -78,6 +78,8 @@ def save_to_postgres(df,epoch):
                 .option("url", "jdbc:postgresql://localhost:5432/pinterest_streaming") \
                 .option("driver", "org.postgresql.Driver").option("dbtable", "experimental_data") \
                 .option("user", "postgres").option("password", "postgres").mode("append").save()
+                # for postgres metrics to prometheus
+                # sudo docker run -d --name postgres_exporter -p 9187:9187 --net=host -e DATA_SOURCE_NAME="postgresql://postgres:postgres@local:5432/ >postgres?sslmode=disable" wrouesnel/postgres_exporter
             
 stream_rdf = stream_rdf.writeStream \
         .format("console") \
