@@ -1,2 +1,6 @@
 # Pinterest-Data-Processing-Pipeline
-![Screenshot](Flowcharts.pdf)
+
+
+
+![alt text](https://github.com/Emmanuel-Loum/Pinterest-Data-Processing-Pipeline/Flowcharts.png)
+
