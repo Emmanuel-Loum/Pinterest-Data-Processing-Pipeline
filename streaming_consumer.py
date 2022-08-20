@@ -4,9 +4,7 @@ from tokenize import String
 import findspark
 findspark.init
 from pyspark.sql import SparkSession
-from pyspark.streaming import StreamingContext
 import pandas as pd
-from pyspark.sql.functions import translate
 import psycopg2
 import pandas as pd
 from sqlalchemy import create_engine
@@ -14,7 +12,6 @@ from pyspark.sql.types import StructType,StructField ,StringType, IntegerType
 from pyspark.sql.types import *
 from pyspark.sql.functions import from_json
 from pyspark.sql.functions import col
-import json
 from pyspark.sql.functions import when
 from pyspark.sql.functions import regexp_replace
 import numpy as np
@@ -41,10 +38,10 @@ stream_df = spark \
         .option("startingOffsets", "earliest") \
         .load()
 
-
+#convert to string format
 stream_df = stream_df.selectExpr("CAST(value as STRING)")
 
-#create a schema for the dataframe
+#create a schema for the dataframe 
 schema =StructType([
         StructField("index",IntegerType(),False),
         StructField("unique_id",StringType(),False),
@@ -64,7 +61,7 @@ schema =StructType([
 stream_rdf = stream_df.select(from_json(col("value"), schema).alias("data")).select("data.*")
 
 def save_to_postgres(df,epoch):
-        #Perform your transformation 
+        #Perform transformation 
         df = df.withColumn('follower_count',when(df.follower_count.endswith('k'),regexp_replace(df.follower_count,'k','000')) \
                 .when(df.follower_count.endswith('M'),regexp_replace(df.follower_count,'M','000000')) \
                 .when(df.follower_count.endswith('B'),regexp_replace(df.follower_count,'B','000000000'))\
@@ -72,15 +69,17 @@ def save_to_postgres(df,epoch):
         #change follower_count column to int data type
         df = df.withColumn("follower_count", df["follower_count"].cast(IntegerType())).fillna(0) \
                         .drop("index")
+        #remove duplicate rows
+        df = df.dropDuplicates()
         
         #send data to postgres
         df.write.format("jdbc")\
                 .option("url", "jdbc:postgresql://localhost:5432/pinterest_streaming") \
                 .option("driver", "org.postgresql.Driver").option("dbtable", "experimental_data") \
                 .option("user", "postgres").option("password", "postgres").mode("append").save()
-                # for postgres metrics to prometheus
+                # for postgres metrics to prometheus use:
                 # sudo docker run -d --name postgres_exporter -p 9187:9187 --net=host -e DATA_SOURCE_NAME="postgresql://postgres:postgres@local:5432/ >postgres?sslmode=disable" wrouesnel/postgres_exporter
-            
+         
 stream_rdf = stream_rdf.writeStream \
         .format("console") \
         .outputMode("append") \

@@ -29,51 +29,23 @@ class Batch:
         data_stream_consumer.subscribe(topics = ["coretopic"])
         clause = False
         global datapoint
-        #datapoint = defaultdict(int)
-        #datapoint['data']=[]
         datapoint=[]
         num = 0
         for message in data_stream_consumer:
-            print(message)
-                       
+            print(message)          
             num += 1
-            #datapoint['data'].append(message.value)
-
+            #append to list
             datapoint.append(message.value)
             print(f"next-------------------{num}--------")
             if num == 5000 :
-
+                #retrieves 5000 records
                 print("5000 Max Records Reached")
                 break
                 
-        #print(datapoint)
-        # if clause is True:
-            
-        #     if os.path.isdir('raw_data'):
-        #         pass
-        #     else:
-        #         os.makedirs('raw_data') 
-        #     path = 'raw_data'
-        #     os.chdir(path)
-        #     # To make a unique id using date and time 
-        #     # timestr=datetime.now().strftime("%Y%m%d%H%M%S%")
-            ###
-            # #creates a file and names it after the uniques id
-            # #adds data to the created json file
-            # ###
-            # newfolder = f'{uniqueid}'
-            # os.makedirs(newfolder)
-            # with open(f'{uniqueid}/data.json', 'w') as newjfile:
-            #     json.dump(datapoint, newjfile)
-
-        
-    
-        
     def upload_to_s3(self):
+
         '''
         Method to upload data to aws s3 directly for storage 
-        import json
-        import boto3
         '''
         
         #s3 = boto3.client('s3')
@@ -83,17 +55,11 @@ class Batch:
         start_time = time.time()
         s3_client = boto3.client('s3')
         uniqueid = uuid.uuid4()
-        #s3 = boto3.resource('s3')
         #path_dir = f"{os.getcwd()}/"
         bucket_name = 's3courier' #self.bucket
+        # creates uuid folder sends the data into the folder
         s3_client.put_object(Body=json.dumps(json_object),Bucket=bucket_name, Key=(f"{uniqueid}/data.json"))
-        # os.chdir(f"{path_dir}{uniqueid}")
-        # print('uploading data...')
-        # s3.Bucket(bucket_name).upload_file('data.json', f"{uniqueid}/data.json")  
-        ####
-        # sends the data into the uuid folder
-        # s3_client.put_object(Bucket=bucket_name, Key=('Images/'))  
-        # creates image folder in the uuid folder
+       
         print(f"Uploaded ..........{(time.time() - start_time):.01f}s")
         
 Batch().data_retriever()

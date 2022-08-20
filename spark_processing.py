@@ -50,8 +50,10 @@ class Spark:
         df = spark.read.option('multiline','true').json("data.json")
 
         print("Distinct count: "+str(df.count()))
+        #removes duplicate rows
         df = df.dropDuplicates()
         print("Distinct count: "+str(df.count()))
+        #change the follower_count symbols: k to 000 ,M to 000000
         df = df.withColumn('follower_count',when(df.follower_count.endswith('k'),regexp_replace(df.follower_count,'k','000')) \
                 .when(df.follower_count.endswith('M'),regexp_replace(df.follower_count,'M','000000')) \
                 .when(df.follower_count.endswith('B'),regexp_replace(df.follower_count,'B','000000000'))\
@@ -60,10 +62,10 @@ class Spark:
         df = df.withColumn("follower_count", df["follower_count"].cast(IntegerType())).fillna(0) \
                         .drop("index")
 
-        
+
         df.printSchema()
         df.show(10)
-        #remember to replace the 2k to 2000 and integer format
+        #write to cassandra client
         df.write.format("org.apache.spark.sql.cassandra")\
             .mode('append')\
             .options(table="pindata", keyspace="spark_keyspace")\
@@ -76,13 +78,3 @@ class Spark:
 
 Spark().s3_extract()
 Spark().write_to_cassandra()
-
-
-
-
-
-
-
-
-
-
