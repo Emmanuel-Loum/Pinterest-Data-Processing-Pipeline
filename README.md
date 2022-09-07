@@ -7,7 +7,6 @@
 # API DATA COLLECTION PIPELINE
 ____
 
-![UML Diagram](UML.png)
 
 ## Milestone 1
 
