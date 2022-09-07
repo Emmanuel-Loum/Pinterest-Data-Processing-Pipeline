@@ -28,7 +28,7 @@ A user emulations script which simulates users uploading data to Pinterest.
 
 ```
 ## Milestone 3
-### Retriever method
+### method 1
 
 
 ```python
@@ -39,7 +39,7 @@ A user emulations script which simulates users uploading data to Pinterest.
  
 ```
 
-### Image_retriever method
+### method 2
 ____
 
 
